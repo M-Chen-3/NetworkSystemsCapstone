@@ -1,0 +1,21 @@
+version: '3'
+services:
+  firefox:
+    build: ./docker-firefox
+    ports:
+      - "5800:5800"
+    volumes:
+      - "/docker/appdata/firefox:/config:rw"
+  capture:
+    volumes:
+      - ./:/harness
+    build: .
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+    network_mode: "service:firefox"
+    depends_on:
+      - firefox
+    stdin_open: true
+    tty: true
+

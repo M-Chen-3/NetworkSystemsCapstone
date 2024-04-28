@@ -1,0 +1,3 @@
+[submodule "capture-harness/docker-firefox"]
+	path = capture-harness/docker-firefox
+	url = git@github.com:WalkerKnapp/docker-firefox.git
