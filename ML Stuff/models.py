@@ -73,7 +73,7 @@ x_train, x_valid, y_train, y_valid = train_test_split(
     x_train, y_train, test_size=(1 - TEST_SIZE)*VAL_SIZE
 )
 
-support_vector_machine = svm.SVC(kernel="sigmoid", gamma="scale")
+support_vector_machine = svm.SVC(kernel="poly", gamma="scale")
 support_vector_machine.fit(x_train, y_train)
 
 svm_valid = support_vector_machine.predict(x_valid)
