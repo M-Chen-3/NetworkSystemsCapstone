@@ -12,6 +12,9 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
 TEST_SIZE = 0.2
 VAL_SIZE = 0.2
 
@@ -20,10 +23,12 @@ def load_data():
     direct = "data" + os.sep
     data_files = [f for f in listdir(direct) if isfile(join(direct, f))]
     data_list = [pd.DataFrame(), pd.DataFrame()]
+    overall = pd.DataFrame()
 
     for file in data_files:
         print(f"Loading {file}...")
         df = pd.read_csv(direct + file)
+        overall = pd.concat([overall, df], axis=0, ignore_index=True)
 
         # Get the labels and remove unwanted ones
         data_list[1] = pd.concat([data_list[1], df["website"]], axis=0)
@@ -52,6 +57,9 @@ def load_data():
         data_list[0] = pd.concat([data_list[0], new_df], axis=0, ignore_index=True)
         # print(data_list[0])
 
+    # print(overall.groupby(["website", "protocol"]).count().to_string())
+    # print(overall.groupby(["protocol"]).count().to_string())
+    data_list[0].drop(["protocol_HTTP", "protocol_ICMP", "protocol_MDNS", "protocol_SSDP", "protocol_SSL", "protocol_SSLv2"], axis=1)
     return data_list
 
 # Sample data for model testing
@@ -86,21 +94,29 @@ def test_model(model, name):
     model_test = model.predict(x_test)
 
     print(f"{name} Accuracy of Validation Set Predictions: {accuracy_score(y_valid, model_valid)}")
-    print(f"{name} F1 Score of Validation Set Predictions: {f1_score(y_valid, model_valid, average='weighted')}")
+    print(f"{name} F1 Score of Validation Set Predictions: {f1_score(y_valid, model_valid, average='macro')}")
     print(f"{name} Accuracy of Testing Set Predictions: {accuracy_score(y_test, model_test)}")
-    print(f"{name} F1 Score of Testing Set Predictions: {f1_score(y_test, model_test, average='weighted')}\n")
+    print(f"{name} F1 Score of Testing Set Predictions: {f1_score(y_test, model_test, average='macro')}\n")
 
-linear_svm = svm.LinearSVC(dual="auto")
-test_model(linear_svm, "Linear SVM")
+    # cm = confusion_matrix(y_test, model_test, labels=model.classes_)
+    # disp = ConfusionMatrixDisplay(confusion_matrix=cm,
+    #                             display_labels=model.classes_)
+    # disp.plot()
+    # plt.title(name + " Confusion Matrix Results")
+    # plt.xticks(rotation=45)
+    # plt.savefig(name + "_results.png", bbox_inches='tight')
+
+# linear_svm = svm.LinearSVC(dual="auto")
+# test_model(linear_svm, "Linear SVM")
 
 support_vector_machine = svm.SVC(kernel="rbf", degree=2, gamma="scale", max_iter=10)
 test_model(support_vector_machine, "SVM")
 
-multi_nb = MultinomialNB()
-test_model(multi_nb, "Multinomial Naive Bayes")
+# multi_nb = MultinomialNB()
+# test_model(multi_nb, "Naive Bayes")
 
-decision_tree = DecisionTreeClassifier(random_state=0)
-test_model(decision_tree, "Decision Tree")
+# decision_tree = DecisionTreeClassifier(random_state=0)
+# test_model(decision_tree, "Decision Tree")
 
-random_forest = RandomForestClassifier(n_estimators=100)
-test_model(random_forest, "Random Forest")
+# random_forest = RandomForestClassifier(n_estimators=100)
+# test_model(random_forest, "Random Forest")
